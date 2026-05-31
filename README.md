@@ -6,7 +6,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
-
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-red)](https://climate-risk-platform-9gbtutvxfs2xj7otsyzazk.streamlit.app)
 ---
 
 ## 🎯 Project Overview
