@@ -1,0 +1,57 @@
+name: 🌍 Daily Climate Risk Pipeline
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Runs every day at 6:00 AM UTC
+  workflow_dispatch:       # Allows manual trigger from GitHub UI
+
+jobs:
+  run-pipeline:
+    name: Fetch Data & Score Cities
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: 🌍 Run climate data pipeline
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          echo "Starting daily climate pipeline..."
+          python -c "
+          from ingestion.open_meteo_fetcher import fetch_all_regions
+          from ingestion.worldbank_fetcher import fetch_all
+          from database.loader import load_weather_forecast, load_weather_history, load_climate_indicators
+          from ai_engine.risk_scorer import score_all_cities
+
+          print('Fetching forecast data...')
+          load_weather_forecast(fetch_all_regions(mode='forecast'))
+
+          print('Fetching historical data...')
+          load_weather_history(fetch_all_regions(mode='historical'))
+
+          print('Fetching World Bank indicators...')
+          load_climate_indicators(fetch_all())
+
+          print('Running risk scoring engine...')
+          results = score_all_cities()
+          print(f'Pipeline complete — {len(results)} cities scored!')
+          "
+
+      - name: ✅ Pipeline complete
+        run: echo "Daily climate pipeline finished successfully!"
