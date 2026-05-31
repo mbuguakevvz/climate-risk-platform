@@ -6,3 +6,4 @@ config/.env
 *.db
 logs/
 *.log
+.streamlit/secrets.toml
